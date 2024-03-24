@@ -1,5 +1,6 @@
 package com.walnutbread.autoalarmbot.discord;
 
+import com.walnutbread.autoalarmbot.exception.messageException;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
@@ -18,31 +19,40 @@ public class DiscordListener extends ListenerAdapter {
         User user = event.getAuthor();
         TextChannel textChannel = event.getChannel().asTextChannel();
         Message message = event.getMessage();
+        String returnMessage = "";
 
         log.info("get message : " + message.getContentDisplay());
 
         if(user.isBot()) return;
         else if(message.getContentDisplay().isEmpty()) log.info("디스코드 Message 문자열 값 공백");
 
-        String[] messageArr = message.getContentDisplay().split("/");
+        try {
+            String[] messageArr = message.getContentDisplay().split(" /");
 
-        if(messageArr[0].equalsIgnoreCase("!bot")){
-            String[] messageArgs = Arrays.copyOfRange(messageArr, 1, messageArr.length);
+            if (messageArr[0].equalsIgnoreCase("!bot")) {
+                String[] messageArgs = Arrays.copyOfRange(messageArr, 1, messageArr.length);
 
-            for(String msg : messageArgs) {
-                String returnMessage = SendMessage(event, msg);
-                textChannel.sendMessage(returnMessage).queue();
+                for (String msg : messageArgs) {
+                    returnMessage = SendMessage(event, msg);
+
+                }
+            } else {
+                throw new messageException();
             }
+        } catch (messageException e) {
+            returnMessage = SendMessage(event, "");
+        } finally {
+            textChannel.sendMessage(returnMessage).queue();
         }
+
+        return;
     }
 
     private String SendMessage(MessageReceivedEvent event, String message) {
         User user = event.getAuthor();
-        String returnMessage = "";
+        String returnMessage = "형식에 맞지 않는 메시지 전송입니다. !bot /{명령어} 방식을 이용해주세요.";
         if(Objects.equals(message, "test")) {
             returnMessage = "안녕하세요 " + user.getAsMention() + "님, 테스트 메시지 전송입니다.";
-        } else {
-            returnMessage = "현재 작업 중입니다. 잠시만 기다려주세요.";
         }
 
         log.info("message : " + returnMessage);
