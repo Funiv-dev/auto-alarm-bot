@@ -53,6 +53,8 @@ public class DiscordListener extends ListenerAdapter {
         String returnMessage = "형식에 맞지 않는 메시지 전송입니다. !bot /{명령어} 방식을 이용해주세요.";
         if(Objects.equals(message, "test")) {
             returnMessage = "안녕하세요 " + user.getAsMention() + "님, 테스트 메시지 전송입니다.";
+        } else {
+            returnMessage = "준비 중입니다.";
         }
 
         log.info("message : " + returnMessage);
